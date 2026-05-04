@@ -25,6 +25,8 @@ enum Command {
     Jump {
         #[arg(long, short = 'e')]
         exact: bool,
+        #[arg(long, short = 'a')]
+        all: bool,
         #[arg(value_name = "TARGET")]
         target: String,
         #[arg(value_name = "ROOT")]
@@ -63,16 +65,20 @@ fn prompt_select(matches: &[PathBuf]) -> Result<usize> {
         .context("No selection made")
 }
 
-fn resolve_target(target: &str, root: &std::path::Path, exact: bool) -> Result<PathBuf> {
+fn resolve_target(target: &str, root: &std::path::Path, exact: bool, all: bool) -> Result<PathBuf> {
     let target_lower = target.to_lowercase();
     let max_depth = load_depth();
     debug!("resolving target '{}' in {} (exact={}, depth={})", target_lower, root.display(), exact, max_depth);
 
-    let matches: Vec<PathBuf> = WalkDir::new(root)
+    let walker = WalkDir::new(root)
         .max_depth(max_depth)
+        .follow_links(all);
+
+    let matches: Vec<PathBuf> = walker
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_dir())
+        .filter(|e| all || !e.file_name().to_str().map(|n| n.starts_with('.')).unwrap_or(false))
         .filter_map(|entry| {
             let name_lower = entry.file_name().to_str()?.to_lowercase();
             // short targets or exact mode require literal match;
@@ -114,8 +120,8 @@ fn main() -> Result<()> {
     let depth = load_depth();
 
     match cli.command {
-        Command::Jump { exact, target, root } => {
-            debug!("jump command: target='{}' root={:?} exact={}", target, root, exact);
+        Command::Jump { exact, all, target, root } => {
+            debug!("jump command: target='{}' root={:?} exact={} all={}", target, root, exact, all);
 
             let root = match root {
                 Some(ns_or_path) => {
@@ -129,7 +135,7 @@ fn main() -> Result<()> {
                 None => dirs::home_dir().context("No home directory")?,
             };
 
-            let resolved = resolve_target(&target, &root, exact)?;
+            let resolved = resolve_target(&target, &root, exact, all)?;
             println!("{}", resolved.display());
         }
 
