@@ -18,6 +18,22 @@
         "type": "github"
       }
     },
+    "goto-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777904092,
+        "narHash": "sha256-PuJPq1no+Z5wSwIp/3m2Ba8v4w8VUikKUODUdHZhPzc=",
+        "owner": "Brandon-mg",
+        "repo": "goto",
+        "rev": "36e9f4cba52901e140c25d2629f87e10be03311f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Brandon-mg",
+        "repo": "goto",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1777578337,
@@ -37,6 +53,7 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "goto-src": "goto-src",
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay"
       }
