@@ -8,13 +8,10 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    goto-src = {
-      url = "github:Brandon-mg/goto";
-      flake = false;
-    };
+
   };
 
-  outputs = { self, nixpkgs, flake-utils, rust-overlay, goto-src }:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -28,8 +25,8 @@
           default = pkgs.rustPlatform.buildRustPackage {
             pname = "goto";
             version = "0.1.0";
-            src = goto-src;
-            cargoLock.lockFile = "${goto-src}/Cargo.lock";
+            src = ./.;
+            cargoLock.lockFile = ./Cargo.lock;
             nativeBuildInputs = [ rustToolchain ];
             meta = {
               description = "jump to directories";
