@@ -9,6 +9,8 @@ mod config;
 
 use config::{load_config, load_depth, save_config, save_depth, DEFAULT_DEPTH};
 
+const MIN_FUZZY_LEN: usize = 4;
+
 #[derive(Parser, Debug)]
 #[command(name = "goto", about = "Jump to directories by fuzzy alias")]
 struct Cli {
@@ -75,7 +77,7 @@ fn resolve_target(target: &str, root: &std::path::Path, exact: bool) -> Result<P
             let name_lower = entry.file_name().to_str()?.to_lowercase();
             // short targets or exact mode require literal match;
             // otherwise allow a single typo via levenshtein distance
-            let matches = if exact || target_lower.len() < 3 {
+            let matches = if exact || target_lower.len() < MIN_FUZZY_LEN {
                 target_lower == name_lower
             } else {
                 strsim::levenshtein(&target_lower, &name_lower) <= 1
